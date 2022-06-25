@@ -1,0 +1,10 @@
+{
+  "title": "Home",
+  "description": "Home",
+  "auth": {
+    "signedInAs": "Signed in as {{name}}",
+    "notSignedIn": "Not signed in",
+    "signInButton": "Sign In",
+    "signOutButton": "Sign Out"
+  }
+}
