@@ -10,6 +10,10 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 });
 
 const configuration = {
+  reactStrictMode: true,
+  compiler: {
+    styledComponents: true,
+  },
   swcMinify: false,
   i18n: {
     localeDetection: false,
