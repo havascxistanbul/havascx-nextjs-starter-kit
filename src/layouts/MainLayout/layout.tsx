@@ -1,7 +1,7 @@
 import React from 'react';
+import Head from 'next/head';
 import { NextSeo } from 'next-seo';
 import useTranslation from 'next-translate/useTranslation';
-import Head from 'next/head';
 
 export interface LayoutProps {
   children: JSX.Element | Array<JSX.Element>;

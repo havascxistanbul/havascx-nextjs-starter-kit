@@ -22,3 +22,5 @@ jspm_packages
 .npm
 .node_repl_history
 .env
+out
+build
