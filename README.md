@@ -4,6 +4,7 @@
 
 - Node.js@18.4.0, yarn@1.22.19 and npm@8.12.1
 - Please see the `.npmrc` and `.nvmrc` files for the versions.
+- If you're using Styled-Components in your project, please refer to these two links for using it with SSR enabled: [Configure Styled-Components with SSR](https://styled-components.com/docs/advanced#server-side-rendering)
 
 ## Production for Docker build and run
 
@@ -65,7 +66,6 @@ Open http://localhost:3000 with your browser to see your project.
 ├── i18n.json                # Next-Translation configuration
 ├── next.config.js           # Next JS configuration
 ├── jest.config.js           # Jest configuration
-└── tailwind.config.js       # Tailwind configuration
 ```
 
 ### Deploy to production
