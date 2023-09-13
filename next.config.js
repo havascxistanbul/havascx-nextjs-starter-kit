@@ -20,6 +20,7 @@ const configuration = {
     locales: ['en-US', 'tr'],
     defaultLocale: 'en-US',
   },
+  output: 'standalone',
 };
 
 module.exports = withBundleAnalyzer(nextTranslate(configuration));
