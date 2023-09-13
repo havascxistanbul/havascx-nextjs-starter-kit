@@ -1,47 +1,49 @@
-# Linux + Node + Source + Project dependencies
-FROM node:18.4.0 AS base
-RUN apt-get update && apt-get install libssl-dev ca-certificates -y
+FROM node:20.5-alpine AS base
+
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
+
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+RUN npm i -g husky
+RUN npm i sharp
+RUN npm i
+
+
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-COPY package.json .
-RUN yarn add --dev @swc/cli @swc/core
-RUN yarn add next
-RUN yarn add storybook
-RUN yarn install --frozen-lockfile --force
 
-# Linux + Node + Source + Project dependencies + build assets
-FROM base AS build
-ENV NODE_ENV=production
-WORKDIR /build
-COPY --from=base /app .
-RUN yarn build
+ENV NEXT_TELEMETRY_DISABLED 1
 
-FROM base AS storybook-build
-ENV NODE_ENV=production
-WORKDIR /storybook-build
-COPY --from=base /app .
-RUN yarn build:storybook
+RUN npm run build
 
-# We keep some artifacts from build
-FROM node:18.4.0 AS application
-RUN apt-get update && apt-get install libssl-dev ca-certificates -y
-ENV NODE_ENV=production
+FROM base AS runner
 WORKDIR /app
-COPY --from=build /build/package*.json .
-COPY --from=build /build/.next ./.next
-COPY --from=build /build/public ./public
-RUN yarn add next
-EXPOSE 3000
-CMD yarn start
-HEALTHCHECK CMD curl --fail http://localhost:3000
 
-# for storybook
-FROM node:18.4.0 AS storybook
-RUN apt-get update && apt-get install libssl-dev ca-certificates -y
-WORKDIR /storybook
-COPY --from=storybook-build /storybook-build/package*.json .
-COPY --from=storybook-build /storybook-build/.storybook ./.storybook
-COPY --from=storybook-build /storybook-build/storybook-static ./storybook-static
-EXPOSE 6006
-CMD npx http-server ./storybook-static -p 6006
-HEALTHCHECK CMD curl --fail http://localhost:6006
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT 3000
+# set hostname to localhost
+ENV HOSTNAME "0.0.0.0"
+
+CMD ["node", "server.js"]
